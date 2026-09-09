@@ -1,0 +1,32 @@
+{
+  "name": "tbank-bond-watcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.20.0"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ttech-pub/grpc-node-client": "^1.59.0",
+    "@ttech-pub/invest-core": "^1.59.0",
+    "@ttech-pub/invest-sdk-node": "^1.59.0",
+    "dotenv": "^17.4.2",
+    "node-cron": "^4.6.0",
+    "pino": "^10.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.0",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "protobufjs@7.6.6": true
+  }
+}

@@ -1,0 +1,5 @@
+.opencode
+bond-watcher-info.md
+.env
+dist/
+node_modules/
