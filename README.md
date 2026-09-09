@@ -1,4 +1,4 @@
-# tbank-bond-watcher v1
+# bond-watcher v1
 
 Ежедневный отчёт по облигациям: T-Invest API → список бумаг → Telegram.
 

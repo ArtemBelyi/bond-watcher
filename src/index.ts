@@ -1,7 +1,19 @@
 import { loadConfig } from './config/index.js';
+import {
+  formatDailyReport,
+  toReportItem,
+} from './domain/templateMsg.js';
+import { take } from './utils/array.js';
+import {
+  APP_NAME,
+  closeTinvestSdk,
+  createTinvestSdk,
+} from './infrastructure/tinkoff/sdk.js';
+import { InstrumentsService } from './infrastructure/tinkoff/instruments.js';
+import { TelegramNotifier } from './infrastructure/telegram/notifier.js';
 import { createLogger } from './logger.js';
 
-function main(): void {
+async function main(): Promise<void> {
   let config;
   try {
     config = loadConfig();
@@ -11,18 +23,54 @@ function main(): void {
   }
 
   const logger = createLogger(config.logLevel);
+
+  const sdk = await createTinvestSdk({
+    token: config.tinvestToken,
+    url: config.tinvestApiUrl,
+    appName: APP_NAME,
+  });
+
+  const instruments = new InstrumentsService(sdk);
+  const notifier = new TelegramNotifier(
+    config.telegramBotToken,
+    config.telegramChatId,
+  );
+
   logger.info('started');
 
-  const keepAlive = setInterval(() => undefined, 2_147_483_647);
+  try {
+    const bonds = await instruments.getBonds();
+    const items = take(bonds, config.reportLimit).map(toReportItem);
+    const text = formatDailyReport({
+      items,
+      total: bonds.length,
+      now: new Date(),
+      timeZone: config.timezone,
+    });
 
-  const shutdown = (signal: string): void => {
+    await notifier.send(text);
+
+    logger.info(
+      { shown: items.length, total: bonds.length },
+      'telegram sent',
+    );
+
+  } catch (error) {
+    logger.error({ err: error }, 'telegram report failed');
+  }
+
+  const shutdown = async (signal: string): Promise<void> => {
     logger.info({ signal }, 'shutdown');
-    clearInterval(keepAlive);
+    await closeTinvestSdk(sdk);
     process.exit(0);
   };
 
-  process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => {
+    void shutdown('SIGINT');
+  });
+  process.on('SIGTERM', () => {
+    void shutdown('SIGTERM');
+  });
 }
 
-main();
+void main();

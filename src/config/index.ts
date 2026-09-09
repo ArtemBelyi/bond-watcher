@@ -58,10 +58,10 @@ function parseBoolean(name: string, fallback: boolean): boolean {
   throw new Error(`Invalid boolean env: ${name}`);
 }
 
-function parsePositiveInt(name: string, fallback: number): number {
+function parsePositiveInt(name: string, num: number): number {
   const raw = process.env[name]?.trim();
   if (raw === undefined || raw === '') {
-    return fallback;
+    return num;
   }
   const parsed = Number(raw);
   if (!Number.isInteger(parsed) || parsed <= 0) {
@@ -96,7 +96,7 @@ export function loadConfig(): Config {
     cronSchedule: optional('CRON_SCHEDULE', '0 9 * * *'),
     timezone: optional('TZ', 'Europe/Moscow'),
     runOnStart: parseBoolean('RUN_ON_START', false),
-    reportLimit: parsePositiveInt('REPORT_LIMIT', 20),
+    reportLimit: parsePositiveInt('REPORT_LIMIT', 5),
     logLevel: parseLogLevel('LOG_LEVEL', 'info'),
   };
 }

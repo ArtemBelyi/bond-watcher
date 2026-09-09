@@ -12,14 +12,18 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "^2.14.1",
     "@ttech-pub/grpc-node-client": "^1.59.0",
     "@ttech-pub/invest-core": "^1.59.0",
     "@ttech-pub/invest-sdk-node": "^1.59.0",
     "dotenv": "^17.4.2",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.6.3",
     "node-cron": "^4.6.0",
     "pino": "^10.3.1"
   },
   "devDependencies": {
+    "@types/moment": "^2.11.29",
     "@types/node": "^26.5.0",
     "@types/node-cron": "^3.0.11",
     "tsx": "^4.23.13",
