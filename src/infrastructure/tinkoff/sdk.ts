@@ -1,25 +1,27 @@
 import { InvestNodeSDK } from '@ttech-pub/invest-sdk-node';
+import { NodeApiClient } from '@ttech-pub/grpc-node-client';
+import type { InverstNodeSDKOptions } from '@ttech-pub/invest-sdk-node/src/lib/core/instance.js';
 
-export const APP_NAME = 'bond-watcher';
-
-export type CreateTinvestSdkOptions = {
-  token: string;
-  url: string;
-  appName?: string;
-};
 
 /**
  * Creates an Invest gRPC SDK client.
  */
-export async function createTinvestSdk(
-  options: CreateTinvestSdkOptions,
+export async function initTinvestSdk(
+  options: InverstNodeSDKOptions,
 ): Promise<InvestNodeSDK> {
   return InvestNodeSDK.create({
-    token: options.token,
-    url: options.url,
-    metadata: {
-      'x-app-name': options.appName ?? APP_NAME,
-    },
+    ...options,
+    metadata: { ...options.metadata, 'x-app-name': 'bond-watcher' },
+    useMincifryCertificate: true,
+  });
+}
+
+export async function initNodeApiClient(
+  options: InverstNodeSDKOptions,
+): Promise<NodeApiClient> {
+  return NodeApiClient.create({
+    ...options,
+    metadata: { ...options.metadata, 'x-app-name': 'bond-watcher' },
     useMincifryCertificate: true,
   });
 }

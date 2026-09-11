@@ -5,9 +5,9 @@ import {
 } from './domain/templateMsg.js';
 import { take } from './utils/array.js';
 import {
-  APP_NAME,
   closeTinvestSdk,
-  createTinvestSdk,
+  initTinvestSdk,
+  initNodeApiClient,
 } from './infrastructure/tinkoff/sdk.js';
 import { InstrumentsService } from './infrastructure/tinkoff/instruments.js';
 import { TelegramNotifier } from './infrastructure/telegram/notifier.js';
@@ -24,10 +24,15 @@ async function main(): Promise<void> {
 
   const logger = createLogger(config.logLevel);
 
-  const sdk = await createTinvestSdk({
+  const sdk = await initTinvestSdk({
     token: config.tinvestToken,
     url: config.tinvestApiUrl,
-    appName: APP_NAME,
+  });
+
+  // TODO
+  const client = await initNodeApiClient({
+    token: config.tinvestToken,
+    url: config.tinvestApiUrl,
   });
 
   const instruments = new InstrumentsService(sdk);
