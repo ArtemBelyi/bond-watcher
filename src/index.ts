@@ -5,11 +5,10 @@ import {
 } from './domain/templateMsg.js';
 import { take } from './utils/array.js';
 import {
-  closeTinvestSdk,
-  initTinvestSdk,
-  initNodeApiClient,
+  closeApiClient,
+  initApiClient,
 } from './infrastructure/tinkoff/sdk.js';
-import { InstrumentsService } from './infrastructure/tinkoff/instruments.js';
+import { BondSource, FavoritesSource } from './infrastructure/tinkoff/instruments.js';
 import { TelegramNotifier } from './infrastructure/telegram/notifier.js';
 import { createLogger } from './logger.js';
 
@@ -24,18 +23,14 @@ async function main(): Promise<void> {
 
   const logger = createLogger(config.logLevel);
 
-  const sdk = await initTinvestSdk({
+  const client = await initApiClient({
     token: config.tinvestToken,
     url: config.tinvestApiUrl,
   });
 
-  // TODO
-  const client = await initNodeApiClient({
-    token: config.tinvestToken,
-    url: config.tinvestApiUrl,
-  });
+  const bondSource = new BondSource(client);
+  const favorieSource = new FavoritesSource(client);
 
-  const instruments = new InstrumentsService(sdk);
   const notifier = new TelegramNotifier(
     config.telegramBotToken,
     config.telegramChatId,
@@ -44,11 +39,14 @@ async function main(): Promise<void> {
   logger.info('started');
 
   try {
-    const bonds = await instruments.getBonds();
-    const items = take(bonds, config.reportLimit).map(toReportItem);
+    // TODO
+    const bonds = await bondSource.getAll();
+    const favorites = await favorieSource.getAll();
+
+    const items = take(favorites, config.reportLimit).map(toReportItem);
     const text = formatDailyReport({
       items,
-      total: bonds.length,
+      total: favorites.length,
       now: new Date(),
       timeZone: config.timezone,
     });
@@ -56,7 +54,7 @@ async function main(): Promise<void> {
     await notifier.send(text);
 
     logger.info(
-      { shown: items.length, total: bonds.length },
+      { shown: items.length, total: favorites.length },
       'telegram sent',
     );
 
@@ -66,7 +64,7 @@ async function main(): Promise<void> {
 
   const shutdown = async (signal: string): Promise<void> => {
     logger.info({ signal }, 'shutdown');
-    await closeTinvestSdk(sdk);
+    await closeApiClient(client);
     process.exit(0);
   };
 

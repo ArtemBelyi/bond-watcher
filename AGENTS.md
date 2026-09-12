@@ -22,18 +22,16 @@ Node.js 24.20 (установлено глобально), TypeScript, `node-cro
   - Sandbox: `sandbox-invest-public-api.tbank.ru:443`
 - Документация API: https://developer.tbank.ru/invest/intro/intro (это описание API, а не SDK).
 
-SDK (в порядке приоритета):
+Клиент:
 
-1. `@ttech-pub/invest-sdk-node` — официальный/полуофициальный от T-Tech (высокоуровневая обёртка).
-   - Внутри использует `@ttech-pub/invest-core` + `@ttech-pub/grpc-node-client`.
+1. `@ttech-pub/grpc-node-client` — официальный gRPC-клиент T-Tech (`NodeApiClient`).
+   - Endpoints напрямую: `client.instruments.bonds(...)`, без command-обёрток.
+   - Создание: `await NodeApiClient.create({ token, url, useMincifryCertificate: true })`.
    - Может требовать registry Т-Банка (opensource.tbank.ru). Если `npm i` не находит — добавить `.npmrc`.
-   - Создание примерно: `await InvestNodeSDK.create({ token, url, appName })`.
-2. Fallback: `tinkoff-invest-api` (vitalets) — проверенный community SDK на gRPC.
+2. Fallback: `tinkoff-invest-api` (vitalets) — community SDK на gRPC.
    - Создание: `new TinkoffInvestApi({ token, appName })`.
 
-Не ставить: `@ttech-pub/invest-engine-node`, старый `@tinkoff/invest-js`.
-
-Обязательно передавать `appName` (например `tbank-bond-watcher`).
+Не ставить: `@ttech-pub/invest-sdk-node` (сырой, неполный), `@ttech-pub/invest-engine-node`, `@tinkoff/invest-js`, `@ttech-pub/invest-core`.
 
 ## Слои
 src/index.ts              процесс, cron, wiring
@@ -54,8 +52,8 @@ src/infrastructure/       реализации портов (tinkoff, telegram)
 ## Tinkoff-сервис
 Обёртка над SDK, не тонкий вызов `Bonds()` из use-case.
 
-src/infrastructure/tinkoff/sdk.ts         создание/закрытие клиента SDK
-src/infrastructure/tinkoff/instruments.ts InstrumentsService
+src/infrastructure/tinkoff/sdk.ts         создание/закрытие `NodeApiClient`
+src/infrastructure/tinkoff/instruments.ts InstrumentsService (обёртка над `client.instruments`)
 
 v1 реализовать только `getBonds()` → gRPC `InstrumentsService.Bonds` (`INSTRUMENT_STATUS_BASE`).
 Остальные методы — сигнатуры в том же классе, тело `throw new Error('not implemented')` (или не вызывать). Не реализовывать, пока не попросили.

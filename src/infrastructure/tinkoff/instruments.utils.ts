@@ -1,5 +1,6 @@
 import type { Bond as GrpcBond } from '@ttech-pub/grpc-node-client';
-import type { Bond } from '../../ports.js';
+import type { FavoriteInstrument as DrpcFI } from '@ttech-pub/grpc-node-client/compiled/instruments.js';
+import type { Bond, FavoriteInstrument } from '../../ports.js';
 
 export function mapBond(instrument: GrpcBond): Bond {
   const bond: Bond = {
@@ -14,6 +15,14 @@ export function mapBond(instrument: GrpcBond): Bond {
   }
 
   return bond;
+}
+
+export function mapFavorite(instrument: DrpcFI): FavoriteInstrument {
+  return {
+    figi: instrument.figi,
+    ticker: instrument.ticker,
+    name: instrument.name,
+  };
 }
 
 /**

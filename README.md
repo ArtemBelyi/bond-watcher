@@ -7,7 +7,7 @@
 ## Стек
 
 - Node.js 24.20, TypeScript (ESM, strict)
-- T-Invest API — только gRPC (`@ttech-pub/invest-sdk-node`)
+- T-Invest API — только gRPC (`@ttech-pub/grpc-node-client`)
 - Telegram Bot API (`fetch`)
 - `node-cron`, `dotenv`, `pino`
 
